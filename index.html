@@ -99,6 +99,18 @@
   .wrong { background:var(--red); }
   .secondary { background:#e9eee9; color:var(--ink) !important; }
   .keys { margin:14px 0 0; font-size:.8rem; color:#6c8177; }
+  .mc-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:0 0 14px; }
+  .mc-row[hidden] { display:none; }
+  .mc-row button { flex:1 1 28%; min-width:92px; font-size:1.5rem; font-weight:800; padding:14px 10px; border-radius:16px; border:2px solid #cfe0d3; background:#fff; color:#17402b; cursor:pointer; }
+  .mc-row.stack { flex-direction:column; }
+  .mc-row.stack button { flex:1 1 auto; font-size:1.3rem; padding:12px 10px; }
+  .mc-row button { overflow-wrap:anywhere; }
+  .mc-row button small { display:block; font-size:.8rem; font-weight:600; opacity:.75; margin-top:2px; }
+  .mc-row button:hover:not(:disabled) { background:#eef7f0; }
+  .mc-row button:disabled { opacity:.5; cursor:default; }
+  .mapbox { margin-top:10px; text-align:center; }
+  .mapbox[hidden] { display:none; }
+  .mapbox svg { max-width:100%; height:190px; }
   .answer-row { display:flex; flex-direction:column; align-items:center; gap:10px; margin:0 0 14px; }
   .answer-main { display:flex; gap:10px; width:100%; }
   .answer-main #startBtn { flex:0 0 auto; min-width:0; padding:12px 14px; font-size:1.05rem; white-space:nowrap; }
@@ -224,7 +236,7 @@
   <button class="soundbtn" id="soundBtn" type="button" aria-label="Geluid aan of uit" title="Geluid aan of uit">🔊</button>
   <button class="gear" id="gearBtn" type="button" aria-label="Instellingen voor ouders" title="Instellingen voor ouders">⚙️</button>
   <h1>🐉 Oefendraak <span class="flip" aria-hidden="true">🐉</span></h1>
-  <p class="subtitle" id="subtitle" style="font-size:.75rem;opacity:.7;margin-top:0">Versie 2.1</p>
+  <p class="subtitle" id="subtitle" style="font-size:.75rem;opacity:.7;margin-top:0">Versie 2.2</p>
 
   <div class="birthday" id="birthday" hidden></div>
 
@@ -246,7 +258,7 @@
   </div>
 
   <div class="viewtoggle" id="viewToggle" role="group" aria-label="Wat wil je spelen?" hidden>
-    <button type="button" id="viewDag">🐉 Dagdraak</button><button type="button" id="viewQuest">🗺️ Queeste</button>
+    <button type="button" id="viewDag">🐉 Dagdraak</button><button type="button" id="viewQuest">🗺️ Queeste</button><button type="button" id="viewL3" hidden>🧪 Toverdrank</button>
   </div>
 
   <div class="layout">
@@ -277,7 +289,9 @@
     <div class="play">
       <section class="word-card" aria-live="polite" aria-atomic="true">
         <div id="word" class="idle">Klaar om te oefenen?</div>
+        <div class="mapbox" id="mapBox" hidden></div>
       </section>
+      <div class="mc-row" id="mcRow" hidden></div>
 
       <!-- Maaltafels: zelf typen of het antwoord (voor de volwassene) tonen -->
       <div class="answer-row" id="answerRow" hidden>
@@ -402,6 +416,13 @@
       <label class="check"><input type="checkbox" id="f-ttyped"> Bij sommen (maaltafels en optellen/aftrekken): het kind typt het antwoord zelf (het spel controleert)</label>
 
       </details>
+      <details class="ex"><summary>🔀 Meerkeuze (3 opties)</summary>
+        <div class="fields" id="fields-mc"></div>
+      <label class="check"><input type="checkbox" id="f-compare"> Groter, kleiner of gelijk (twee getallen vergelijken)</label>
+      <label class="check"><input type="checkbox" id="f-provmap"> Belgische provincies op de kaart</label>
+      <label for="f-spell">Welke schrijfwijze is juist? <span style="font-weight:400">(één per regel: eerst de juiste, dan twee foute, gescheiden door | bv. bomen|bommen|boomen)</span></label>
+      <textarea id="f-spell" spellcheck="false" style="min-height:90px"></textarea>
+      </details>
       <details class="ex"><summary>✍️ Dictee</summary>
       <label class="check"><input type="checkbox" id="f-dicteeOn"> Dictee oefenen (het woord wordt voorgelezen, het kind typt het)</label>
       <label for="f-dictee">Dicteewoorden <span style="font-weight:400">(één per regel; leeg = de woordenlijst hieronder gebruiken)</span></label>
@@ -426,12 +447,17 @@
       <select id="f-questStory"><option value="parel">De verdwenen vuurparel</option><option value="cadeau">Het verdwenen verjaardagscadeau</option></select>
       <label for="f-questFinal">Bericht als de queeste klaar is (bv. waar het cadeau ligt)</label>
       <input id="f-questFinal" type="text" maxlength="200" autocomplete="off">
-      <div class="row" style="margin-top:8px"><button class="secondary" id="questReset" type="button">Queeste opnieuw starten</button></div>
-      <label class="check"><input type="checkbox" id="f-questOpen"> Queeste altijd open (ook als de draak van vandaag nog niet volwassen is)</label>
+      <div class="row" style="margin-top:8px"><button class="secondary" id="questReset" type="button">Queeste (level 2 en 3) opnieuw starten</button></div>
+      <label class="check"><input type="checkbox" id="f-questOpen"> Level 2 en 3 altijd open (ook als de draak van vandaag nog niet volwassen is)</label>
       <label>Oefening per plaats (vaste volgorde)</label>
       <div class="row" id="qmodes"></div>
       <p class="hintline" id="questMsg"></p>
 
+      </details>
+      <details class="ex"><summary>🧪 Toverdrank (level 3)</summary>
+        <p class="hintline">Opent na een volwassen draak van vandaag én een voltooide queeste (level 2), tenzij "altijd open" aanstaat bij level 2. Het aantal sterren per plaats volgt level 2; elke ster vraagt 1 juist antwoord extra.</p>
+        <label>Oefening per plaats (vaste volgorde)</label>
+        <div class="row" id="q3modes"></div>
       </details>
 
       <div class="panel-msg" id="formMsg" role="status"></div>
@@ -511,12 +537,17 @@
     sums: false,
     dicteeOn: true,
     dictee: [],
+    spell: [],
+    compare: false,
+    compareMax: 10,
+    provMap: false,
     quest: false,
     questStory: "parel",
     questPer: 4,
     questExtra: 1,
     questOpen: false,
     questModes: ["words", "sentences", "tables", "dictee", "words"],
+    quest3Modes: ["words", "dictee", "words", "dictee", "words"],
     questFinal: "Hoera! Je hebt het gevonden! 🎉",
     birthday: "",
     qa: [],
@@ -540,37 +571,72 @@
       label: "Sam",
       correctPerStar: 4,
       quest: true,
-      questStory: "cadeau",
       questPer: 3,
       questModes: ["words", "sums", "dictee", "sums", "words"],
+      quest3Modes: ["words", "compare", "dictee", "sums", "words"],
       birthday: "20-11",
-      questFinal: "Gelukkige verjaardag, Sam! 🎂 Het cadeautje is gevonden.",
       sums: true,
-      sumsMax: 6,
+      sumsMax: 8,
+      compare: true,
+      compareMax: 10,
       tables: [],
-      words: ["voor", "zes", "in", "naam", "baas", "mee", "zoen", "boos", "hij", "mijn", "vaas", "koe", "net", "teen", "met", "vin", "daar", "doe", "hijs", "ijs", "eet", "bek", "ook", "kook", "poes", "hoek", "naar", "doet", "sip", "en", "rij", "vet", "zijn", "poot", "beer", "hoop", "oom", "raap", "dik", "ree", "bed", "bid", "bij", "bijt", "boek", "boer", "boem", "boot", "been", "beet", "dek", "den", "dit", "dij", "dijk", "doek", "doen", "doos", "door", "dood", "deed", "mees", "meet", "reep", "rook", "room", "roer", "zeep", "zeer", "veer", "veen", "wij", "wijs", "hoes", "wit", "pit", "tip", "dip", "doop", "weer", "waar", "maar", "is", "win", "zin", "zoon", "nek", "hek", "wek", "week", "wijk", "boen", "ben", "wen", "ven", "ik", "mis", "mik", "min", "kin", "kim", "kip", "sik", "sis", "sim", "pin", "pik", "tik", "tin", "tim", "rit", "rim", "ris", "rik", "vis", "zit", "zet", "mes", "men", "nep", "pet", "pen", "bes", "bet", "dis", "boom", "boon", "beek", "poen", "poep", "maan", "maat", "maak", "neem", "neen", "nee", "meer", "roos", "roem", "raam", "rem", "ren", "rek", "koop", "teer", "toon", "pijn", "tijd", "dan", "zus", "heet", "oor", "uk", "soep", "wat", "haas", "jij", "bot", "op", "taak", "om", "as", "dun", "wok", "jaar", "voet", "hip", "woon", "jan", "moe", "vee", "noem", "hut", "roep", "zij"],
+      words: ["voor", "zes", "in", "naam", "baas", "mee", "zoen", "boos", "hij", "mijn", "vaas", "koe", "net", "teen", "met", "vin", "daar", "doe", "hijs", "ijs", "eet", "bek", "ook", "kook", "poes", "hoek", "naar", "doet", "sip", "en", "rij", "vet", "zijn", "poot", "beer", "hoop", "oom", "raap", "dik", "ree", "bed", "bid", "bij", "bijt", "boek", "boer", "boem", "boot", "been", "beet", "dek", "den", "dit", "dij", "dijk", "doek", "doen", "doos", "door", "dood", "deed", "mees", "meet", "reep", "rook", "room", "roer", "zeep", "zeer", "veer", "veen", "wij", "wijs", "hoes", "wit", "pit", "tip", "dip", "doop", "weer", "waar", "maar", "is", "win", "zin", "zoon", "nek", "hek", "wek", "week", "wijk", "boen", "ben", "wen", "ven", "ik", "mis", "mik", "min", "kin", "kim", "kip", "sik", "sis", "sim", "pin", "pik", "tik", "tin", "tim", "rit", "rim", "ris", "rik", "vis", "zit", "zet", "mes", "men", "nep", "pet", "pen", "bes", "bet", "dis", "boom", "boon", "beek", "poen", "poep", "maan", "maat", "maak", "neem", "neen", "nee", "meer", "roos", "roem", "raam", "rem", "ren", "rek", "koop", "teer", "toon", "pijn", "tijd", "dan", "zus", "heet", "oor", "uk", "soep", "wat", "haas", "jij", "bot", "op", "taak", "om", "as", "dun", "wok", "jaar", "voet", "hip", "woon", "jan", "moe", "vee", "noem", "hut", "roep", "zij", "bus", "kus", "mus", "dus", "ruk", "rok", "bok", "buk", "pot", "put", "hup", "hap", "puk"],
       sentences: null
     },
     mina: {
       name: "Mina",
       label: "Mina",
+      provMap: true,
+      quest3Modes: ["spell", "map", "dictee", "tables", "qa2"],
+      spell: [
+        "bomen|bommen|boomen", "bommen|bomen|boommen", "haar|har|haer", "regen|reegen|reggen", "lopen|loopen|loppen",
+        "bedden|beden|bedde", "dubbel|dubel|dubbell", "ijs|eis|iis", "meisje|mijsje|meijsje", "jij|jei|ji",
+        "kaas|kas|kaaz", "hoed|hoet|hoedt", "hond|hont|hondt", "eend|eent|eendt", "bed|bet|bedd",
+        "vogels|fogels|vochels", "vlinder|flinder|vlindar", "fietsen|vietsen|fietzen", "zomer|soomer|zommer", "winter|wintter|vinter",
+        "boeken|boekken|boecken", "stoel|stoul|stool", "pannen|panen|panne", "leeuw|leeuuw|leew", "nieuw|nieuuw|niew",
+        "cadeau|kadoo|cadoo", "school|schol|skool", "gras|grasz|graz", "mooi|mooy|moi", "toeter|toetter|tooter"
+      ],
+      dictee: ["verhuizen", "scheenbeen", "spitsmuizen", "ezel", "neushoorn", "jammer", "pauwen", "betalen", "dappere", "everzwijn", "grassen", "klagen", "ooien", "bijenhotel", "sneeuwluipaard"],   // Dictee thema 2
       correctPerStar: 5,
       tables: [1, 2, 3, 4, 5, 6, 10],
       birthday: "30-03",
-      qa2Title: "Hoofdsteden van Europa",
+      qa2Title: "Meervoud",
       qa2: [
-        "Hoofdstad van België? = Brussel | Bruxelles",
-        "Hoofdstad van Nederland? = Amsterdam",
-        "Hoofdstad van Frankrijk? = Parijs | Paris",
-        "Hoofdstad van Duitsland? = Berlijn | Berlin",
-        "Hoofdstad van Luxemburg? = Luxemburg | Luxembourg",
-        "Hoofdstad van Engeland? = Londen | London",
-        "Hoofdstad van Spanje? = Madrid",
-        "Hoofdstad van Italië? = Rome | Roma",
-        "Hoofdstad van Portugal? = Lissabon | Lisboa",
-        "Hoofdstad van Oostenrijk? = Wenen | Wien",
-        "Hoofdstad van Zwitserland? = Bern | Berne",
-        "Hoofdstad van Denemarken? = Kopenhagen"
+        "Wat is het meervoud van boom? = bomen",
+        "Wat is het meervoud van bal? = ballen",
+        "Wat is het meervoud van kat? = katten",
+        "Wat is het meervoud van hoed? = hoeden",
+        "Wat is het meervoud van tas? = tassen",
+        "Wat is het meervoud van bed? = bedden",
+        "Wat is het meervoud van stoel? = stoelen",
+        "Wat is het meervoud van haas? = hazen",
+        "Wat is het meervoud van huis? = huizen",
+        "Wat is het meervoud van glas? = glazen",
+        "Wat is het meervoud van kind? = kinderen",
+        "Wat is het meervoud van ei? = eieren",
+        "Wat is het meervoud van blad? = bladeren",
+        "Wat is het meervoud van leeuw? = leeuwen",
+        "Wat is het meervoud van pen? = pennen",
+        "Wat is het meervoud van dak? = daken",
+        "Wat is het meervoud van weg? = wegen",
+        "Wat is het meervoud van dief? = dieven",
+        "Wat is het meervoud van brief? = brieven",
+        "Wat is het meervoud van kip? = kippen",
+        "Wat is het meervoud van jas? = jassen",
+        "Wat is het meervoud van mus? = mussen",
+        "Wat is het meervoud van pauw? = pauwen",
+        "Wat is het meervoud van ooi? = ooien",
+        "Wat is het meervoud van vis? = vissen",
+        "Wat is het meervoud van hand? = handen",
+        "Wat is het meervoud van been? = benen",
+        "Wat is het meervoud van koe? = koeien",
+        "Wat is het meervoud van stad? = steden",
+        "Wat is het meervoud van schip? = schepen",
+        "Wat is het meervoud van lid? = leden",
+        "Wat is het meervoud van gat? = gaten",
+        "Wat is het meervoud van bos? = bossen",
+        "Wat is het meervoud van ezel? = ezels",
+        "Wat is het meervoud van vlinder? = vlinders"
       ],
       qaTitle: "Provincies en hoofdplaatsen",
       qa: [
@@ -676,8 +742,11 @@
     if (!d.quest || typeof d.quest !== "object") d.quest = { start: "", view: "", dragon: -1 };
     if (!Array.isArray(d.quest.prog) || d.quest.prog.length !== 5) d.quest.prog = [0, 0, 0, 0, 0];
     d.quest.prog = d.quest.prog.map(v => Number.isFinite(v) && v > 0 ? Math.min(5000, Math.floor(v)) : 0);
+    if (!Array.isArray(d.quest.prog3) || d.quest.prog3.length !== 5) d.quest.prog3 = [0, 0, 0, 0, 0];
+    d.quest.prog3 = d.quest.prog3.map(v => Number.isFinite(v) && v > 0 ? Math.min(5000, Math.floor(v)) : 0);
+    d.quest.cleared = !!d.quest.cleared;     // level 2 ooit uitgespeeld: dat opent level 3
     if (typeof d.quest.start !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(d.quest.start)) d.quest.start = "";
-    if (d.quest.view !== "dag" && d.quest.view !== "queeste") d.quest.view = "";
+    if (d.quest.view !== "dag" && d.quest.view !== "queeste" && d.quest.view !== "level3") d.quest.view = "";
     if (!Number.isInteger(d.quest.dragon) || d.quest.dragon < -1 || d.quest.dragon > 5) d.quest.dragon = -1;
     const keys = Object.keys(d.days).sort();
     while (keys.length > 400) delete d.days[keys.shift()];
@@ -721,9 +790,49 @@
   const isQA = () => (S.mode === "qa" || S.mode === "qa2") && hasQA(cfg(), S.mode);
   const qaNorm = x => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[-\s]+/g, " ").trim();
   const isTyped = () => isDictee() || (isQA() && !!cfg().qaTyped) || (isMath() && !!cfg().tablesTyped);
+  // Meerkeuze met 3 opties: spelling ("juist|fout|fout"), groter/kleiner/gelijk en provincies op de kaart.
+  const spellParts = x => String(x).split("|").map(t => t.trim());
+  const spellList = c => (Array.isArray(c.spell) ? c.spell : []).filter(x => { const a = spellParts(x); return a.length === 3 && a.every(Boolean); });
+  const hasSpell = c => spellList(c).length >= 1;
+  const hasCompare = c => !!c.compare;
+  const hasMap = c => !!c.provMap;
+  const isSpell = () => S.mode === "spell" && hasSpell(cfg());
+  const isCompare = () => S.mode === "compare" && hasCompare(cfg());
+  const isMap = () => S.mode === "map" && hasMap(cfg());
+  const isMC = () => isSpell() || isCompare() || isMap();
+  const compareItems = c => { const out = [], M = c.compareMax; for (let a = 1; a <= M; a++) for (let b = 1; b <= M; b++) out.push(`${a} ? ${b}`); return out; };
+  const compareSign = x => { const m = /^(\d+) \? (\d+)$/.exec(x); return !m ? "=" : +m[1] > +m[2] ? ">" : +m[1] < +m[2] ? "<" : "="; };
+  const SIGN_LABEL = { "<": "kleiner", "=": "gelijk", ">": "groter" };
+  // Vereenvoudigde kaart van België (ruwe omtrekken, geen exacte landkaart). Coördinaten: [lengte, breedte].
+  const PROVINCES = [
+    { n: "West-Vlaanderen", p: [[2.55,51.09],[3.37,51.37],[3.35,51.2],[3.55,51.0],[3.45,50.8],[3.2,50.75],[2.9,50.75],[2.6,50.9]] },
+    { n: "Oost-Vlaanderen", p: [[3.37,51.37],[4.2,51.38],[4.25,51.1],[4.1,50.85],[3.9,50.72],[3.45,50.8],[3.55,51.0],[3.35,51.2]] },
+    { n: "Antwerpen", p: [[4.2,51.38],[4.5,51.47],[5.1,51.45],[5.2,51.2],[5.0,51.05],[4.7,50.95],[4.45,50.95],[4.25,51.1]] },
+    { n: "Limburg", p: [[5.1,51.45],[5.7,51.15],[5.85,50.75],[5.45,50.7],[5.1,50.78],[5.0,50.9],[5.0,51.05],[5.2,51.2]] },
+    { n: "Vlaams-Brabant", p: [[4.25,51.1],[4.45,50.95],[4.7,50.95],[5.0,51.05],[5.0,50.9],[5.1,50.78],[4.95,50.7],[4.7,50.68],[4.55,50.7],[4.25,50.8],[4.1,50.85]] },
+    { n: "Waals-Brabant", p: [[4.25,50.8],[4.55,50.7],[4.7,50.68],[4.95,50.7],[4.9,50.55],[4.55,50.5],[4.25,50.55]] },
+    { n: "Henegouwen", p: [[3.2,50.75],[3.45,50.8],[3.9,50.72],[4.1,50.85],[4.25,50.8],[4.25,50.55],[4.55,50.5],[4.45,50.3],[4.15,50.1],[3.8,50.35],[3.3,50.5]] },
+    { n: "Namen", p: [[4.55,50.5],[4.9,50.55],[5.3,50.55],[5.35,50.25],[5.2,50.0],[4.85,49.95],[4.7,50.1],[4.45,50.3]] },
+    { n: "Luik", p: [[5.1,50.78],[5.45,50.7],[5.85,50.75],[6.0,50.75],[6.4,50.45],[6.2,50.2],[5.9,50.15],[5.65,50.3],[5.35,50.25],[5.3,50.55],[4.9,50.55],[4.95,50.7]] },
+    { n: "Luxemburg", p: [[5.2,50.0],[5.35,50.25],[5.65,50.3],[5.9,50.15],[6.2,50.2],[6.15,49.85],[5.85,49.55],[5.4,49.5],[5.0,49.7],[4.85,49.95]] }
+  ];
+  function mapSvg(name) {
+    const pt = ([lo, la]) => `${((lo - 2.5) * 95).toFixed(1)},${((51.55 - la) * 155).toFixed(1)}`;
+    const polys = PROVINCES.map(pr => `<polygon points="${pr.p.map(pt).join(" ")}" fill="${pr.n === name ? "#ef8a1f" : "#d6ebd0"}" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>`).join("");
+    return `<svg viewBox="0 0 380 330" role="img" aria-label="Kaart van België met één gekleurde provincie">${polys}<circle cx="${pt([4.35, 50.85]).split(",")[0]}" cy="${pt([4.35, 50.85]).split(",")[1]}" r="5" fill="#b9c4bd" stroke="#fff" stroke-width="2"/></svg>`;
+  }
+  const mcCorrect = item => isSpell() ? spellParts(item)[0] : isCompare() ? compareSign(item) : item;
+  const itemLabel = w => { if (S.mode === "spell") return spellParts(w)[0]; if (S.mode === "compare") return w.replace("?", compareSign(w)); return w; };
+  function mcOptions(item) {
+    if (isCompare()) return ["<", "=", ">"].map(v => ({ v, text: v, sub: SIGN_LABEL[v] }));
+    let vals;
+    if (isSpell()) vals = spellParts(item);
+    else { const others = shuffled(PROVINCES.map(x => x.n).filter(n => n !== item)).slice(0, 2); vals = [item, ...others]; }
+    return shuffled(vals).map(v => ({ v, text: v, sub: "" }));
+  }
   const dicteeList = c => (Array.isArray(c.dictee) && c.dictee.length >= 3) ? c.dictee : c.words;
   const normWord = x => String(x).trim().toLowerCase().replace(/\s+/g, " ");
-  const modeAvailable = m => m === "words" || (m === "sentences" && hasSentences(cfg())) || (m === "tables" && hasTables(cfg())) || (m === "sums" && hasSums(cfg())) || (m === "dictee" && !!cfg().dicteeOn) || ((m === "qa" || m === "qa2") && hasQA(cfg(), m));
+  const modeAvailable = m => m === "words" || (m === "sentences" && hasSentences(cfg())) || (m === "tables" && hasTables(cfg())) || (m === "sums" && hasSums(cfg())) || (m === "dictee" && !!cfg().dicteeOn) || ((m === "qa" || m === "qa2") && hasQA(cfg(), m)) || (m === "spell" && hasSpell(cfg())) || (m === "compare" && hasCompare(cfg())) || (m === "map" && hasMap(cfg()));
   // Optellen en aftrekken tot sumsMax: "4 + 3" en "9 − 4" (getallen ≥ 1, uitkomst mag 0 zijn bij aftrekken).
   function sumItems(c) {
     const out = [], M = c.sumsMax;
@@ -750,8 +859,8 @@
     const a = Number(m[1]), b = Number(m[3]);
     return m[2] === "×" ? a * b : m[2] === "÷" ? a / b : m[2] === "+" ? a + b : a - b;
   }
-  const items = () => isQA() ? qaList(cfg(), S.mode) : isDictee() ? dicteeList(cfg()) : isTables() ? tableItems(cfg()) : isSums() ? sumItems(cfg()) : isSent() ? cfg().sentences : cfg().words;
-  const unit = (n = 2) => isQA() ? (n === 1 ? "vraag" : "vragen") : isMath() ? (n === 1 ? "som" : "sommen") : isSent() ? (n === 1 ? "zin" : "zinnen") : (n === 1 ? "woord" : "woorden");
+  const items = () => isSpell() ? spellList(cfg()) : isCompare() ? compareItems(cfg()) : isMap() ? PROVINCES.map(x => x.n) : isQA() ? qaList(cfg(), S.mode) : isDictee() ? dicteeList(cfg()) : isTables() ? tableItems(cfg()) : isSums() ? sumItems(cfg()) : isSent() ? cfg().sentences : cfg().words;
+  const unit = (n = 2) => (isQA() || isMC()) ? (n === 1 ? "vraag" : "vragen") : isMath() ? (n === 1 ? "som" : "sommen") : isSent() ? (n === 1 ? "zin" : "zinnen") : (n === 1 ? "woord" : "woorden");
 
   function todayRec() {
     const k = dayKey();
@@ -825,6 +934,23 @@
   }
   // Toont een woord, een zin of een som.
   function showItem(text) {
+    $("mapBox").hidden = !isMap();
+    if (isMC()) {
+      S.opts = mcOptions(text);
+      const row = $("mcRow"); row.textContent = "";
+      S.opts.forEach((o, i) => {
+        const b = document.createElement("button"); b.type = "button"; b.dataset.i = i; b.textContent = o.text;
+        if (o.sub) { const sm = document.createElement("small"); sm.textContent = o.sub; b.appendChild(sm); }
+        b.addEventListener("click", () => answerMC(i));
+        row.appendChild(b);
+      });
+      row.classList.toggle("stack", isSpell() || S.opts.some(o => o.text.length > 8));
+      if (isMap()) { $("mapBox").innerHTML = mapSvg(text); showWord("Welke provincie is dit?", "sentence"); }
+      else if (isSpell()) showWord("Welke schrijfwijze is juist?", "sentence");
+      else showWord(text.replace("?", " ? "), "word");
+      resetAnswerUI();
+      return;
+    }
     if (isDictee()) {
       showWord(text.replace(/[^\s-]/g, "_").split("").join(" "), "word");
       resetAnswerUI();
@@ -1031,6 +1157,9 @@
     if (c.dicteeOn) modes.push(["dictee", "Dictee"]);
     if (hasQA(c)) modes.push(["qa", c.qaTitle || "Vraag en antwoord"]);
     if (hasQA(c, "qa2")) modes.push(["qa2", c.qa2Title || "Vraag en antwoord 2"]);
+    if (hasSpell(c)) modes.push(["spell", "Welke schrijfwijze is juist?"]);
+    if (hasCompare(c)) modes.push(["compare", "Groter, kleiner of gelijk"]);
+    if (hasMap(c)) modes.push(["map", "Provincies op de kaart"]);
     const sel = $("practiceMode");
     if (Array.from(sel.options).map(o => o.value + o.textContent).join() !== modes.map(m => m[0] + m[1]).join()) {
       sel.textContent = "";
@@ -1043,8 +1172,12 @@
 
     // Maaltafels: zelf typen, of de volwassene beoordeelt (met "antwoord tonen")
     const typed = isTyped();
-    $("correctBtn").hidden = typed;
-    $("wrongBtn").hidden = typed;
+    const mc = isMC();
+    $("correctBtn").hidden = typed || mc;
+    $("wrongBtn").hidden = typed || mc;
+    $("mcRow").hidden = !(mc && p === "playing");
+    $("mapBox").hidden = !(isMap() && p === "playing");
+    $("revealRow").hidden = true;
     $("answerRow").hidden = !typed;
     // Bij zelf typen staat Start/Pauze op dezelfde rij als het invulvak; de andere knoppen eronder.
     { const host = typed ? $("answerMain") : $("actions"), sb = $("startBtn");
@@ -1064,14 +1197,14 @@
     $("answerInput").placeholder = dic ? "Typ hier" : "Antwoord";
     $("answerInput").removeAttribute("pattern");
     if (!txt) $("answerInput").setAttribute("pattern", "[0-9]*");
-    $("revealRow").hidden = !((isMath() || isQA()) && !typed);
+    $("revealRow").hidden = !((isMath() || isQA()) && !typed) || mc;
     $("answerInput").disabled = p !== "playing";
     $("answerOk").disabled = p !== "playing";
     $("revealBtn").disabled = p !== "playing";
 
     const sent = isSent();
     $("hint").textContent =
-      p === "playing" ? (isQA() ? (typed ? "Typ het antwoord en druk op Enter." : "Zeg het antwoord hardop en kies Juist of Fout.")
+      p === "playing" ? (mc ? "Kies het juiste antwoord. Je kunt ook op 1, 2 of 3 drukken." : isQA() ? (typed ? "Typ het antwoord en druk op Enter." : "Zeg het antwoord hardop en kies Juist of Fout.")
                          : dic ? "Luister goed, typ het woord en druk op Enter. Met 🔊 hoor je het nog eens."
                          : typed ? "Los de som op, typ het antwoord en druk op Enter."
                                        : isMath() ? "Los de som op, zeg het antwoord hardop en kies Juist of Fout."
@@ -1135,7 +1268,7 @@
     else box.textContent = `🔥 ${n} ${n === 1 ? "dag" : "dagen"} na elkaar. Oefen vandaag om je reeks te houden!`;
     const hard = hardNow();
     $("hardline").textContent = hard.length
-      ? "🎯 Extra oefenen: " + hard.slice(0, 5).join(" · ") + (hard.length > 5 ? ` (+${hard.length - 5})` : "")
+      ? "🎯 Extra oefenen: " + hard.slice(0, 5).map(itemLabel).join(" · ") + (hard.length > 5 ? ` (+${hard.length - 5})` : "")
       : "";
   }
 
@@ -1239,6 +1372,8 @@
         const v = Math.min(HARD_MAX, num(inc.hard[w]));
         if (typeof w === "string" && w.length <= 120 && v > 0) cur.hard[w] = Math.max(cur.hard[w] || 0, v);
       });
+      if (inc.quest && Array.isArray(inc.quest.prog3)) inc.quest.prog3.slice(0, 5).forEach((v, i) => { if (Number.isFinite(v) && v > cur.quest.prog3[i]) cur.quest.prog3[i] = Math.min(5000, Math.floor(v)); });
+      if (inc.quest && inc.quest.cleared === true) cur.quest.cleared = true;
       if (inc.quest && Array.isArray(inc.quest.prog)) inc.quest.prog.slice(0, 5).forEach((v, i) => { if (Number.isFinite(v) && v > cur.quest.prog[i]) cur.quest.prog[i] = Math.min(5000, Math.floor(v)); });
       if (inc.quest && typeof inc.quest.start === "string" && keyToDate(inc.quest.start) && (!cur.quest.start || inc.quest.start < cur.quest.start)) cur.quest.start = inc.quest.start;
       Object.keys(inc.adult || {}).forEach(day => { if (keyToDate(day)) cur.adult[day] = 1; });
@@ -1307,14 +1442,27 @@
       ]
     }
   };
-  const QUEST = new Proxy({}, { get: (_, k) => (STORIES[cfg().questStory] || STORIES.parel)[k] });
+  // Level 3: de zieke draak en de toverdrank (vijf ingrediënten). Nieuwe levels komen als nieuwe verhalen + kaart bij.
+  const STORY3 = {
+    title: "De toverdrank voor de zieke draak", prize: { emoji: "🧪", name: "de toverdrank" }, done: "De toverdrank is klaar!",
+    final: "Je roert alle vijf de ingrediënten door elkaar. 🧪 De toverdrank werkt! Je draak is weer helemaal beter. 🐉💖",
+    stations: [
+      { name: "Het Elfenbos",    emoji: "🍄", item: "🍄", goal: "Oei, je draak is ziek! 🤒 De heks van de berg kan een toverdrank brouwen, maar ze heeft vijf ingrediënten nodig. Het eerste groeit in het elfenbos.", found: "Je plukt een rode paddenstoel met witte stippen! 🍄 Ingrediënt 1 van 5." },
+      { name: "Het Moeras",      emoji: "🐸", item: "🌿", goal: "Het tweede ingrediënt groeit in het moeras. Pas op voor de kikkers!", found: "Tussen het riet vind je een glanzend moeraskruid! 🌿 Ingrediënt 2 van 5." },
+      { name: "De Waterval",     emoji: "💧", item: "💧", goal: "Achter de waterval glinstert iets. Het derde ingrediënt!", found: "Je vangt een druppel regenboogwater op! 💧 Ingrediënt 3 van 5." },
+      { name: "De Kristalgrot",  emoji: "💎", item: "💎", goal: "In de kristalgrot ligt het vierde ingrediënt verborgen.", found: "Je vindt een fonkelend kristal! 💎 Ingrediënt 4 van 5." },
+      { name: "De Vulkaan",      emoji: "🌋", item: "🔥", goal: "Het laatste ingrediënt groeit hoog op de vulkaan. Bijna klaar!", found: "Je plukt een vuurbloem! 🔥 Ingrediënt 5 van 5. Nu heb je alles voor de toverdrank." }
+    ]
+  };
+  const QUEST = new Proxy({}, { get: (_, k) => (questLevel() === 3 ? STORY3 : (STORIES[cfg().questStory] || STORIES.parel))[k] });
   /* ---------- de kaart zelf, getekend in dezelfde stijl als de draak ---------- */
   const qcanvas = $("qcanvas"), qctx = qcanvas.getContext ? qcanvas.getContext("2d") : null;
   let qView = null, qShown = 0;
   const QSTART = [46, 296], QPOS = [[84, 262], [262, 206], [440, 262], [596, 226], [722, 206]];
-  const QPTS = [QSTART].concat(QPOS);
+  const QPOS3 = [[84, 262], [262, 244], [440, 262], [596, 234], [722, 208]];
+  const qpos = () => questLevel() === 3 ? QPOS3 : QPOS;
   function qBez(i, t) {
-    const a = QPTS[i], b = QPTS[i + 1], c1 = [a[0] + (b[0] - a[0]) * .45, a[1]], c2 = [a[0] + (b[0] - a[0]) * .55, b[1]], u = 1 - t;
+    const P = [QSTART].concat(qpos()), a = P[i], b = P[i + 1], c1 = [a[0] + (b[0] - a[0]) * .45, a[1]], c2 = [a[0] + (b[0] - a[0]) * .55, b[1]], u = 1 - t;
     return [u * u * u * a[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * b[0],
             u * u * u * a[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * b[1]];
   }
@@ -1334,10 +1482,7 @@
     if (stroke) { ctx.lineWidth = 6; ctx.strokeStyle = stroke; ctx.lineJoin = "round"; ctx.strokeText(t, x, y); }
     ctx.fillStyle = color; ctx.fillText(t, x, y);
   }
-  function qScene(now) {
-    const t = now / 1000, q = qView || { done: 0, n: 5, per: 1, into: 0, finished: false };
-    const target = q.finished ? 5 : Math.min(5, q.done + 1);     // het draakje staat bij de plaats waar je nu oefent en loopt naar de volgende zodra die gehaald is
-    qShown += (target - qShown) * .06; if (Math.abs(target - qShown) < .002) qShown = target;
+  function qBackdrop2(t, q) {
     // lucht en wolken
     const sky = ctx.createLinearGradient(0, 0, 0, 360); sky.addColorStop(0, "#a9defa"); sky.addColorStop(.6, "#e6f6ff"); sky.addColorStop(1, "#fff8dc");
     ctx.fillStyle = sky; ctx.fillRect(0, 0, 800, 360);
@@ -1376,6 +1521,47 @@
     stroke([[688, 92], [688, 70]], "#7a5230", 3); path([[688, 70], [708, 76], [688, 84]], "#ffd23f");
     if (q.finished) { const p = Math.sin(t * 3); for (let i = 0; i < 6; i++) star(690 + i * 20, 70 + Math.sin(t * 2 + i) * 14, 6 + p, "#fff3a0"); }
 
+  }
+  function qBackdrop3(t, q) {
+    const sky = ctx.createLinearGradient(0, 0, 0, 360); sky.addColorStop(0, "#5b4fa8"); sky.addColorStop(.55, "#b98ad6"); sky.addColorStop(1, "#ffd6e8");
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, 800, 360);
+    ellipse(700, 56, 30, 30, "#fff3b0"); ellipse(712, 50, 26, 26, "#6a58b3");
+    for (let i = 0; i < 14; i++) star((i * 61 + 17) % 780 + 10, (i * 37) % 120 + 12, 3 + ((i + Math.floor(t * 2)) % 3) * .6, "#fff8d0");
+    path([[0, 250], [120, 200], [260, 240], [420, 190], [580, 236], [700, 196], [800, 240], [800, 360], [0, 360]], "#7a64b4");
+    const gr = ctx.createLinearGradient(0, 230, 0, 360); gr.addColorStop(0, "#6bbf7a"); gr.addColorStop(1, "#3d8f63");
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(0, 270); ctx.quadraticCurveTo(200, 236, 400, 270); ctx.quadraticCurveTo(600, 240, 800, 266); ctx.lineTo(800, 360); ctx.lineTo(0, 360); ctx.closePath(); ctx.fill();
+    // 1 elfenbos: paddenstoelen
+    [[40, 296, 1], [118, 284, .8], [150, 316, .65], [72, 318, .7]].forEach(([x, y, k]) => {
+      ctx.fillStyle = "#f3e6d3"; ctx.fillRect(x - 7 * k, y - 4 * k, 14 * k, 34 * k); ellipse(x, y - 6 * k, 34 * k, 24 * k, "#e5483e");
+      [[-14, -10], [6, -18], [16, -4], [-4, -2]].forEach(([dx, dy]) => ellipse(x + dx * k, y - 6 * k + dy * k, 5 * k, 4 * k, "#ffffff"));
+    });
+    // 2 moeras
+    ellipse(262, 306, 92, 30, "#2f7d6b"); ellipse(262, 304, 84, 24, "#3f9a82");
+    [[226, 300], [274, 310], [302, 298]].forEach(([x, y]) => ellipse(x, y, 16, 6, "#7fdc8a"));
+    [[216, 290], [236, 284], [300, 286], [314, 292]].forEach(([x, y]) => { stroke([[x, y + 16], [x, y - 30]], "#4d6b2f", 3); ellipse(x, y - 34, 4, 10, "#7b4a22"); });
+    for (let i = 0; i < 4; i++) ellipse(240 + i * 22, 300 - ((t * 20 + i * 14) % 40), 3, 3, "#d7fff0");
+    // 3 waterval
+    path([[392, 262], [408, 120], [472, 120], [488, 262]], "#8c8aa8"); path([[408, 120], [420, 100], [460, 100], [472, 120]], "#a5a3c2");
+    ctx.fillStyle = "#9fe1ff"; ctx.fillRect(425, 120, 30, 142);
+    ctx.strokeStyle = "#ffffffcc"; ctx.lineWidth = 3; ctx.lineCap = "round";
+    for (let i = 0; i < 4; i++) { const x = 430 + i * 7, off = (t * 60 + i * 30) % 140; ctx.beginPath(); ctx.moveTo(x, 122 + off); ctx.lineTo(x, 122 + Math.min(140, off + 26)); ctx.stroke(); }
+    ellipse(440, 276, 70, 18, "#6cc7ee"); ellipse(440, 274, 56, 12, "#a8e6ff");
+    // 4 kristalgrot
+    path([[530, 262], [560, 196], [610, 170], [660, 196], [690, 262]], "#6c6a8c");
+    ctx.fillStyle = "#2c2742"; ctx.beginPath(); ctx.moveTo(576, 250); ctx.quadraticCurveTo(576, 196, 610, 196); ctx.quadraticCurveTo(644, 196, 644, 250); ctx.closePath(); ctx.fill();
+    [[596, 236, "#ff9de2", 26], [616, 230, "#9de0ff", 34], [634, 240, "#d8b4ff", 22]].forEach(([x, y, col, h]) => path([[x - 8, y + 10], [x, y - h], [x + 8, y + 10]], col));
+    ctx.globalAlpha = .6 + .4 * Math.sin(t * 3); star(612, 208, 5, "#ffffff"); ctx.globalAlpha = 1;
+    // 5 vulkaan
+    path([[660, 262], [720, 130], [744, 130], [800, 262]], "#7a4a3a"); path([[720, 130], [732, 116], [744, 130], [732, 138]], "#ff6a3d");
+    ctx.globalAlpha = .5 + .3 * Math.sin(t * 4); ellipse(732, 124, 30, 14, "#ffb347"); ctx.globalAlpha = 1;
+    for (let i = 0; i < 3; i++) { const k = (t * 30 + i * 40) % 110; ctx.globalAlpha = Math.max(0, 1 - k / 110); ellipse(732 + Math.sin(k / 14 + i) * 10, 116 - k, 10 + k / 12, 10 + k / 12, "#b9a8c9"); ctx.globalAlpha = 1; }
+    if (q.finished) { const pl = Math.sin(t * 3); for (let i = 0; i < 6; i++) star(60 + i * 130, 60 + Math.sin(t * 2 + i) * 14, 6 + pl, "#fff3a0"); }
+  }
+  function qScene(now) {
+    const t = now / 1000, q = qView || { done: 0, n: 5, per: 1, into: 0, finished: false };
+    const target = q.finished ? 5 : Math.min(5, q.done + 1);     // het draakje staat bij de plaats waar je nu oefent en loopt naar de volgende zodra die gehaald is
+    qShown += (target - qShown) * .06; if (Math.abs(target - qShown) < .002) qShown = target;
+    if (questLevel() === 3) qBackdrop3(t, q); else qBackdrop2(t, q);
     // pad
     for (let i = 0; i < 5; i++) {
       const f = Math.max(0, Math.min(1, qShown - i));
@@ -1384,7 +1570,7 @@
     }
     // plaatsen
     QUEST.stations.forEach((st, i) => {
-      const [x, y] = QPOS[i], done = i < q.done, now_ = i === q.done && !q.finished;
+      const [x, y] = qpos()[i], done = i < q.done, now_ = i === q.done && !q.finished;
       const pulse = now_ ? 1 + .07 * Math.sin(t * 4) : 1;
       if (now_) { ctx.globalAlpha = .35 + .2 * Math.sin(t * 4); ellipse(x, y, 44, 44, "#ffd27a"); ctx.globalAlpha = 1; }
       ellipse(x, y + 3, 30 * pulse, 30 * pulse, "#00000030");
@@ -1392,7 +1578,7 @@
       ellipse(x, y, 24 * pulse, 24 * pulse, done ? "#c9f2cc" : now_ ? "#fff3c4" : "#ebe6d6");
       ctx.font = '30px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.globalAlpha = done || now_ ? 1 : .55; ctx.fillStyle = "#333"; ctx.fillText(done ? st.item : st.emoji, x, y + 2); ctx.globalAlpha = 1;
-      qText(st.name.replace(/^(Het|De) /, ""), x, y + 46, 24, done ? "#1f6b36" : "#5b4a1d", "#fffbe8");
+      qText(st.name.replace(/^(Het|De) /, ""), x, y + 46, questLevel() === 3 ? 21 : 24, done ? "#1f6b36" : "#5b4a1d", "#fffbe8");
       if (now_) qText(`⭐ ${q.into}/${q.per}`, x, y - 48, 24, "#a85d00", "#fffbe8");
     });
     // het draakje loopt over het pad
@@ -1404,6 +1590,10 @@
     const oldHue = V.hue; V.hue = DRAGON_HUES[q.dragon === undefined ? hueIndex(new Date()) : q.dragon][1];
     dragon(dx - 4, dy + 34 - 108 * s - 8 + bob, s, 0, t * 6);
     V.hue = oldHue;
+    if (questLevel() === 3) {     // de draak is ziek totdat de toverdrank klaar is
+      ctx.font = '30px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(q.finished ? "💖" : "🤒", dx + 8, dy - 14 + bob);
+    }
   }
   function qLoop(now) {
     requestAnimationFrame(qLoop);
@@ -1417,18 +1607,19 @@
 
   // Level 2: elke plaats heeft één vaste oefening en eigen tellers (data.quest.prog), los van de dagsterren.
   // Een ster in level 2 = (juiste antwoorden per ster van die oefening) + questExtra juiste antwoorden.
-  const QMODES = ["words", "sentences", "tables", "sums", "dictee", "qa", "qa2"];
+  const QMODES = ["words", "sentences", "tables", "sums", "dictee", "qa", "qa2", "spell", "compare", "map"];
+  const progArr = () => questLevel() === 3 ? S.data.quest.prog3 : S.data.quest.prog;
   function questMode(i) {
-    const c = cfg(), m = (c.questModes || [])[Math.min(i, 4)];
+    const c = cfg(), m = ((questLevel() === 3 ? c.quest3Modes : c.questModes) || [])[Math.min(i, 4)];
     return m && modeAvailable(m) ? m : "words";
   }
   function questRate(i) {
     const c = cfg(), m = questMode(i);
     const base = m === "sentences" ? c.sentencesPerStar : m === "tables" ? c.tablesPerStar : m === "sums" ? c.sumsPerStar : c.correctPerStar;
-    return base + (c.questExtra || 0);
+    return base + (c.questExtra || 0) + (questLevel() === 3 ? 1 : 0);      // level 3 is nog net iets moeilijker
   }
   function questState() {
-    const c = cfg(), per = c.questPer, n = QUEST.stations.length, prog = S.data.quest.prog;
+    const c = cfg(), per = c.questPer, n = QUEST.stations.length, prog = progArr();
     let done = 0;
     while (done < n && prog[done] >= per * questRate(done)) done++;
     const finished = done >= n, cur = Math.min(done, n - 1);
@@ -1436,7 +1627,10 @@
     return { per, n, done, finished, into, cur, rate: questRate(cur), mode: questMode(cur) };
   }
   const questUnlocked = () => { const c = cfg(); return !!c.quest && (!!c.questOpen || outcome(c, todayRec()).adult); };
-  const inQuest = () => questUnlocked() && S.data.quest.view === "queeste";
+  const l3Unlocked = () => { const c = cfg(); return !!c.quest && (!!c.questOpen || (!!S.data.quest.cleared && outcome(c, todayRec()).adult)); };
+  // 1 = dagdraak, 2 = queeste, 3 = toverdrank
+  function questLevel() { const v = S.data.quest.view; return v === "level3" && l3Unlocked() ? 3 : v === "queeste" && questUnlocked() ? 2 : 1; }
+  const inQuest = () => questLevel() >= 2;
   function renderQuest() {
     const c = cfg();
     renderView();
@@ -1445,15 +1639,16 @@
     QUEST.stations.forEach((st, k) => { if (k < q.done) items.push(st.item); });
     qView = q; q.dragon = chosenDragon();
     $("qagain").hidden = !q.finished;
+    if (q.finished && questLevel() === 2 && !S.data.quest.cleared) { S.data.quest.cleared = true; saveData(); }
     qcanvas.setAttribute("aria-label", `Kaart van de queeste: ${q.done} van ${q.n} plaatsen gehaald` + (q.finished ? "" : `. Volgende: ${QUEST.stations[q.done].name}`));
     $("questTitle").textContent = QUEST.title;
     $("qitems").textContent = items.join(" ");
     $("qtext").textContent = q.finished
-      ? `🎉 ${c.questFinal}`
+      ? `🎉 ${questLevel() === 3 ? QUEST.final : c.questFinal}`
       : `${QUEST.stations[q.done].goal} Nog ${q.per - q.into} ${q.per - q.into === 1 ? "ster" : "sterren"} te verdienen voor ${QUEST.stations[q.done].name.toLowerCase()}.`;
   }
   // Weergave: dagdraak (eitje, groeien, vuur) of queeste (kaart). Beide tellen dezelfde oefeningen en sterren.
-  const viewNow = () => inQuest() ? "queeste" : "dag";
+  const viewNow = () => ["dag", "dag", "queeste", "level3"][questLevel()];
   const chosenDragon = () => hueIndex(new Date());   // level 2 speel je met de draak van de dag
   function syncMode() {
     if (S.phase === "playing" || S.phase === "paused") return;
@@ -1471,25 +1666,33 @@
     syncMode();
     const v = viewNow();
     $("viewToggle").hidden = !c.quest;
-    $("viewDag").classList.toggle("on", v === "dag"); $("viewQuest").classList.toggle("on", v === "queeste");
+    $("viewDag").classList.toggle("on", v === "dag"); $("viewQuest").classList.toggle("on", v === "queeste"); $("viewL3").classList.toggle("on", v === "level3");
     $("viewQuest").textContent = unlocked ? "🗺️ Queeste" : "🔒 Queeste";
     $("viewQuest").title = unlocked ? "" : `Maak eerst je draak volwassen (${c.starGoal} sterren)`;
-    $("viewDag").disabled = locked; $("viewQuest").disabled = locked;
-    $("quest").hidden = v !== "queeste";
-    document.querySelector(".dragon-growth").hidden = v === "queeste";
+    const l3Seen = !!c.quest && (!!c.questOpen || !!S.data.quest.cleared), l3 = l3Unlocked();
+    $("viewL3").hidden = !l3Seen;
+    $("viewL3").textContent = l3 ? "🧪 Toverdrank" : "🔒 Toverdrank";
+    $("viewL3").title = l3 ? "" : `Maak eerst je draak volwassen (${c.starGoal} sterren)`;
+    $("viewDag").disabled = locked; $("viewQuest").disabled = locked; $("viewL3").disabled = locked;
+    $("quest").hidden = v === "dag";
+    document.querySelector(".dragon-growth").hidden = v !== "dag";
   }
   $("viewDag").addEventListener("click", () => { S.data.quest.view = "dag"; saveData(); renderAll(); });
   $("viewQuest").addEventListener("click", () => {
     if (!questUnlocked()) { $("message").textContent = `🔒 Eerst je draak van vandaag volwassen maken (${cfg().starGoal} sterren). Dan open je de queeste!`; return; }
     S.data.quest.view = "queeste"; saveData(); renderAll();
   });
-  $("qagain").addEventListener("click", () => { S.data.quest.prog = [0, 0, 0, 0, 0]; saveData(); renderAll(); });
+  $("viewL3").addEventListener("click", () => {
+    if (!l3Unlocked()) { $("message").textContent = `🔒 Eerst je draak van vandaag volwassen maken (${cfg().starGoal} sterren). Dan open je de toverdrank-queeste!`; return; }
+    S.data.quest.view = "level3"; saveData(); renderAll();
+  });
+  $("qagain").addEventListener("click", () => { if (questLevel() === 3) S.data.quest.prog3 = [0, 0, 0, 0, 0]; else S.data.quest.prog = [0, 0, 0, 0, 0]; saveData(); renderAll(); });
   function questEvent(idx, finished) {
     const st = QUEST.stations[idx];
     sfx("adult");
-    sceneNote(`${st.item} ${finished ? `${QUEST.prize.name.charAt(0).toUpperCase() + QUEST.prize.name.slice(1)} is gevonden!` : "Je hebt een nieuwe vondst!"}`, 6000);
+    sceneNote(`${st.item} ${finished ? (QUEST.done || `${QUEST.prize.name.charAt(0).toUpperCase() + QUEST.prize.name.slice(1)} is gevonden!`) : "Je hebt een nieuwe vondst!"}`, 6000);
     $("qmodalEmo").textContent = st.item;
-    $("qmodalText").textContent = finished ? `${st.found} ${cfg().questFinal}` : `${st.found} Op naar ${QUEST.stations[idx + 1].name.toLowerCase()}!`;
+    $("qmodalText").textContent = finished ? `${st.found} ${questLevel() === 3 ? QUEST.final : cfg().questFinal}` : `${st.found} Op naar ${QUEST.stations[idx + 1].name.toLowerCase()}!`;
     $("qmodal").hidden = false;
   }
   $("qmodalOk").addEventListener("click", () => { $("qmodal").hidden = true; });
@@ -1623,7 +1826,7 @@
       p.textContent = "Nog even oefenen:";
       const ul = document.createElement("ul");
       ul.className = "missed";
-      S.missed.forEach(w => { const li = document.createElement("li"); li.textContent = isQA() ? `${qaParse(w).q} ${qaParse(w).answers[0]}` : isMath() ? `${w} = ${tableAnswer(w)}` : w; ul.appendChild(li); });
+      S.missed.forEach(w => { const li = document.createElement("li"); li.textContent = isMC() ? itemLabel(w) : isQA() ? `${qaParse(w).q} ${qaParse(w).answers[0]}` : isMath() ? `${w} = ${tableAnswer(w)}` : w; ul.appendChild(li); });
       box.append(p, ul);
     } else {
       p.textContent = total ? "Geen enkel woord om te oefenen — super! 🌟" : "";
@@ -1635,9 +1838,13 @@
     renderAll();
   }
 
+  function answerMC(i) {
+    if (S.phase !== "playing" || !isMC() || !S.opts || !S.opts[i]) return;
+    answer(S.opts[i].v === mcCorrect(S.prev), true);
+  }
   function answer(isCorrect, viaTyping = false) {
     if (S.phase !== "playing") return;
-    if (isTyped() && !viaTyping) return;     // bij zelf typen beslist het spel, niet de knoppen of toetsen
+    if ((isTyped() || isMC()) && !viaTyping) return;     // bij zelf typen beslist het spel, niet de knoppen of toetsen
     const c = cfg(), r = todayRec(), sent = isSent(), tab = isTables(), sm = isSums();
     const kind = sm ? "okR" : tab ? "okT" : sent ? "okS" : "ok";
     const before = outcome(c, r);
@@ -1651,7 +1858,7 @@
       sfx("ok");
       r[kind]++;
       S.roundOk++;
-      $("message").textContent = isQA() ? pick(["Juist! ⭐", "Goed onthouden! 🌟", "Knap hoor! 🎉"])
+      $("message").textContent = (isQA() || isMC()) ? pick(["Juist! ⭐", "Goed gekozen! 🌟", "Knap hoor! 🎉"])
                                      : isDictee() ? pick(["Goed geschreven! ⭐", "Prima gedaan! 🌟", "Knap hoor! 🎉"])
                                      : (tab || sm) ? pick(["Juist! ⭐", "Goed gerekend! 🌟", "Knap hoor! 🎉"])
                                      : pick(["Goed gelezen! ⭐", "Prima gedaan! 🌟", "Knap hoor! 🎉"]);
@@ -1662,7 +1869,9 @@
       S.roundBad++;
       S.review.push({ word, wait: 3 });
       if (!S.missed.includes(word)) { S.missed.push(word); addedMissed = true; }
-      $("message").textContent = isQA()
+      $("message").textContent = isMC()
+        ? `Goed geprobeerd. Het juiste antwoord is: ${mcCorrect(word)}. Deze vraag komt straks nog eens terug.`
+        : isQA()
         ? `Goed geprobeerd. Het antwoord is: ${qaParse(word).answers[0]}. Deze vraag komt straks nog eens terug.`
         : isDictee()
         ? `Goed geprobeerd. Je schrijft: ${word}. Dit woord komt straks nog eens terug.`
@@ -1672,7 +1881,7 @@
     }
     S.last = { ok: isCorrect, word, kind, addedMissed, hardBefore, qplace: -1 };
     if (inQ && isCorrect) {
-      S.data.quest.prog[qBefore.cur]++; S.last.qplace = qBefore.cur;
+      progArr()[qBefore.cur]++; S.last.qplace = qBefore.cur; S.last.qlevel = questLevel();
       const qNow = questState();
       if (qNow.cur === qBefore.cur && qNow.into > qBefore.into) { $("message").textContent = "⭐ Een queeste-ster erbij!"; sfx("star"); }
     }
@@ -1700,7 +1909,7 @@
     const L = S.last, r = todayRec();
     setHard(L.word, L.hardBefore || 0);
     if (L.ok) {
-      if (L.qplace >= 0) S.data.quest.prog[L.qplace] = Math.max(0, S.data.quest.prog[L.qplace] - 1);
+      if (L.qplace >= 0) { const arr = L.qlevel === 3 ? S.data.quest.prog3 : S.data.quest.prog; arr[L.qplace] = Math.max(0, arr[L.qplace] - 1); }
       r[L.kind] = Math.max(0, (r[L.kind] || 0) - 1);
       S.roundOk = Math.max(0, S.roundOk - 1);
     } else {
@@ -2161,6 +2370,7 @@
     sentencesPerStar: { g: "zinnen", min: 1,  max: 50,   label: "Juiste zinnen per ster",          unit: "zinnen" },
     tablesPerStar:    { g: "tafels", min: 1,  max: 50,   label: "Juiste sommen per ster",          unit: "sommen" },
     sumsPerStar:      { g: "sommen", min: 1,  max: 50,   label: "Juiste optel-/aftreksommen per ster", unit: "sommen" },
+    compareMax:       { g: "mc", min: 3,  max: 20,   label: "Groter/kleiner: getallen tot en met", unit: "" },
     sumsMax:          { g: "sommen", min: 5,  max: 100,  label: "Optellen en aftrekken tot en met", unit: "" },
     questPer:         { g: "queeste", min: 1,  max: 50,   label: "Queeste: sterren per plaats", unit: "sterren" },
     questExtra:       { g: "queeste", min: 0,  max: 20,   label: "Queeste: extra juiste antwoorden per ster (moeilijker)", unit: "antwoorden" },
@@ -2194,12 +2404,13 @@
     if (Array.isArray(o.qa2)) out.qa2 = o.qa2.filter(x => typeof x === "string" && qaParse(x)).map(x => x.trim().slice(0, 160)).slice(0, 200);
     if (typeof o.qa2Title === "string") out.qa2Title = o.qa2Title.trim().slice(0, 40);
     if (typeof o.qaTitle === "string") out.qaTitle = o.qaTitle.trim().slice(0, 40);
+    if (Array.isArray(o.spell)) out.spell = o.spell.filter(x => typeof x === "string" && (() => { const a = spellParts(x); return a.length === 3 && a.every(Boolean); })()).map(x => spellParts(x).join("|").slice(0, 80)).slice(0, 300);
     if (Array.isArray(o.dictee)) {
       const a = o.dictee.filter(x => typeof x === "string" && x.trim()).map(x => x.trim().slice(0, 40));
       if (a.length === 0 || a.length >= 3) out.dictee = a;
     }
-    if (Array.isArray(o.questModes) && o.questModes.length === 5 && o.questModes.every(m => QMODES.includes(m))) out.questModes = o.questModes.slice();
-    ["tablesDivide", "tablesTyped", "sums", "sumsAdd", "sumsSub", "dicteeOn", "qaTyped", "quest", "questOpen"].forEach(k => { if (typeof o[k] === "boolean") out[k] = o[k]; });
+    ["questModes", "quest3Modes"].forEach(k => { if (Array.isArray(o[k]) && o[k].length === 5 && o[k].every(m => QMODES.includes(m))) out[k] = o[k].slice(); });
+    ["tablesDivide", "tablesTyped", "sums", "sumsAdd", "sumsSub", "dicteeOn", "qaTyped", "quest", "questOpen", "compare", "provMap"].forEach(k => { if (typeof o[k] === "boolean") out[k] = o[k]; });
     return out;
   }
   function loadSettings() {
@@ -2298,7 +2509,7 @@
     fillVoices(); $("f-rate").value = String(RATES.includes(overrides._rate) ? overrides._rate : 0.8);
     $("f-family").value = (Array.isArray(overrides._family) ? overrides._family : DEFAULT_FAMILY).join("\n");
     $("f-questOpen").checked = !!c.questOpen;
-    buildQModes(); (c.questModes || []).forEach((m, i) => { $("f-qm" + i).value = m; });
+    buildQModes(); (c.questModes || []).forEach((m, i) => { $("f-qm" + i).value = m; }); (c.quest3Modes || []).forEach((m, i) => { $("f-q3m" + i).value = m; });
     $("f-quest").checked = !!c.quest; $("f-questStory").value = c.questStory || "parel"; $("f-questFinal").value = c.questFinal || ""; $("f-birthday").value = c.birthday || "";
     $("f-qa").value = (Array.isArray(c.qa) ? c.qa : []).join("\n");
     $("f-qatitle").value = c.qaTitle || "";
@@ -2306,6 +2517,8 @@
     $("f-qa2title").value = c.qa2Title || "";
     $("f-qtyped").checked = !!c.qaTyped;
     $("f-dictee").value = (Array.isArray(c.dictee) ? c.dictee : []).join("\n");
+    $("f-compare").checked = !!c.compare; $("f-provmap").checked = !!c.provMap;
+    $("f-spell").value = (Array.isArray(c.spell) ? c.spell : []).join("\n");
     updatePreview();
     formMsg("");
     disarmClear();
@@ -2367,6 +2580,8 @@
     if (badQa2) return formMsg(`Bij de tweede lijst moet elke regel "vraag = antwoord" zijn. Kijk naar: ${badQa2.slice(0, 40)}`, "err");
     const famLines = parseList($("f-family").value), badFam = famLines.find(x => !parseFam(x));
     if (badFam) return formMsg(`Andere verjaardagen: schrijf "naam dag-maand", bv. Ada 28-11. Kijk naar: ${badFam.slice(0, 40)}`, "err");
+    const spell = parseList($("f-spell").value), badSpell = spell.find(x => { const a = spellParts(x); return !(a.length === 3 && a.every(Boolean)); });
+    if (badSpell) return formMsg(`Bij "Welke schrijfwijze is juist?" moet elke regel "juist|fout|fout" zijn. Kijk naar: ${badSpell.slice(0, 40)}`, "err");
     const dictee = parseList($("f-dictee").value);
     if (dictee.length > 0 && dictee.length < 3) return formMsg("Bij dictee: vul minstens 3 woorden in, of laat het vak leeg.", "err");
     const tablesText = $("f-tables").value.trim();
@@ -2404,10 +2619,14 @@
     if ($("f-quest").checked !== !!base.quest) o.quest = $("f-quest").checked;
     if ($("f-questOpen").checked !== !!base.questOpen) o.questOpen = $("f-questOpen").checked;
     { const qm = [0, 1, 2, 3, 4].map(i => $("f-qm" + i).value); if (JSON.stringify(qm) !== JSON.stringify(base.questModes)) o.questModes = qm; }
+    { const q3 = [0, 1, 2, 3, 4].map(i => $("f-q3m" + i).value); if (JSON.stringify(q3) !== JSON.stringify(base.quest3Modes)) o.quest3Modes = q3; }
     if ($("f-questFinal").value.trim() !== (base.questFinal || "")) o.questFinal = $("f-questFinal").value.trim();
     if (bday !== (base.birthday || "")) o.birthday = bday;
     if ($("f-dicteeOn").checked !== !!base.dicteeOn) o.dicteeOn = $("f-dicteeOn").checked;
     if (dictee.join("\n") !== (base.dictee || []).join("\n")) o.dictee = dictee;
+    if ($("f-compare").checked !== !!base.compare) o.compare = $("f-compare").checked;
+    if ($("f-provmap").checked !== !!base.provMap) o.provMap = $("f-provmap").checked;
+    if (spell.join("\n") !== (base.spell || []).join("\n")) o.spell = spell;
     if (Object.keys(o).length) overrides[k] = o; else delete overrides[k];
 
     storeSettings(); rebuildCfg(); renderProfiles(); afterSettingsChange(k);
@@ -2427,7 +2646,7 @@
   // Wist de hele voortgang (vandaag + dagboek) van alle kinderen. Instellingen blijven staan.
   function clearAll() {
     Object.keys(children).forEach(k => {
-      const fresh = { days: {}, hard: {}, adult: {}, quest: { start: "", view: "", dragon: -1, prog: [0, 0, 0, 0, 0] } };
+      const fresh = { days: {}, hard: {}, adult: {}, quest: { start: "", view: "", dragon: -1, prog: [0, 0, 0, 0, 0], prog3: [0, 0, 0, 0, 0], cleared: false } };
       saveFor(k, fresh);
       if (k === S.player) S.data = fresh;
     });
@@ -2472,18 +2691,21 @@
   $("answerOk").addEventListener("click", submitTyped);
   $("answerInput").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); submitTyped(); } });
   $("answerInput").addEventListener("input", () => { if (isMath()) $("answerInput").value = $("answerInput").value.replace(/\D/g, ""); });
-  const QLABEL = { words: "Woordlezen", sentences: "Zinnetjes", tables: "Maaltafels", sums: "Optellen/aftrekken", dictee: "Dictee", qa: "Vraag en antwoord", qa2: "Vraag en antwoord 2" };
+  const QLABEL = { words: "Woordlezen", sentences: "Zinnetjes", tables: "Maaltafels", sums: "Optellen/aftrekken", dictee: "Dictee", qa: "Vraag en antwoord", qa2: "Vraag en antwoord 2", spell: "Schrijfwijze kiezen", compare: "Groter/kleiner/gelijk", map: "Provincies op de kaart" };
   function buildQModes() {
-    const box = $("qmodes"); if (box.childElementCount) return;
+    [["qmodes", "f-qm"], ["q3modes", "f-q3m"]].forEach(([boxId, pre]) => buildQRow($(boxId), pre));
+  }
+  function buildQRow(box, pre) {
+    if (box.childElementCount) return;
     [0, 1, 2, 3, 4].forEach(i => {
       const l = document.createElement("label"), sel = document.createElement("select");
-      sel.id = "f-qm" + i; l.textContent = `Plaats ${i + 1}`; l.htmlFor = sel.id; l.style.cssText = "flex:1 1 150px";
+      sel.id = pre + i; l.textContent = `Plaats ${i + 1}`; l.htmlFor = sel.id; l.style.cssText = "flex:1 1 150px";
       QMODES.forEach(m => { const o = document.createElement("option"); o.value = m; o.textContent = QLABEL[m]; sel.appendChild(o); });
       const w = document.createElement("div"); w.style.cssText = "flex:1 1 150px"; w.append(l, sel); box.appendChild(w);
     });
   }
   $("questReset").addEventListener("click", () => {
-    const d = dataFor(panelChild); d.quest.prog = [0, 0, 0, 0, 0]; saveFor(panelChild, d);
+    const d = dataFor(panelChild); d.quest.prog = [0, 0, 0, 0, 0]; d.quest.prog3 = [0, 0, 0, 0, 0]; d.quest.cleared = false; d.quest.view = ""; saveFor(panelChild, d);
     if (panelChild === S.player) { S.data = d; renderQuest(); }
     $("questMsg").textContent = `✓ De queeste van ${children[panelChild].name} begint opnieuw. De voortgang is gewist.`;
   });
@@ -2581,7 +2803,7 @@
     if (tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA") return;
     const k = e.key;
     const handled = k === " " || k === "Spacebar" || k === "ArrowRight" || k === "ArrowLeft" ||
-                    k === "Backspace" || /^[jJfFaA]$/.test(k);
+                    k === "Backspace" || /^[jJfFaA]$/.test(k) || (isMC() && /^[123]$/.test(k));
     if (!handled) return;
     e.preventDefault();
     if (e.repeat) return;
@@ -2589,6 +2811,7 @@
     else if (k === "ArrowRight" || k === "j" || k === "J") answer(true);
     else if (k === "ArrowLeft" || k === "f" || k === "F") answer(false);
     else if (k === "a" || k === "A") revealAnswer();
+    else if (/^[123]$/.test(k)) answerMC(Number(k) - 1);
     else undo();
   });
   document.addEventListener("keyup", e => { if (e.key === " ") e.preventDefault(); });
@@ -2606,24 +2829,6 @@
 
   loadSettings();
   rebuildCfg();
-  // Eenmalig bij de eerste keer openen van versie 2.1: vandaag opnieuw beginnen met een eitje (eerdere dagen blijven bewaard).
-  (function migrate21() {
-    let seen = ""; try { seen = localStorage.getItem("leesdraak-version") || ""; } catch (e) {}
-    if (seen === "2.1") return;
-    Object.keys(children).forEach(k => {
-      const d = loadData(k), day = dayKey();
-      delete d.days[day]; delete d.adult[day];
-      saveFor(k, d);
-    });
-    try { localStorage.setItem("leesdraak-version", "2.1"); } catch (e) {}
-  })();
-  // Eenmalig: de queeste van Sam en Mina terug naar de start.
-  (function questReset21() {
-    let seen = ""; try { seen = localStorage.getItem("leesdraak-qreset") || ""; } catch (e) {}
-    if (seen === "1") return;
-    ["sam", "mina"].forEach(k => { const d = loadData(k); d.quest.prog = [0, 0, 0, 0, 0]; d.quest.view = ""; saveFor(k, d); });
-    try { localStorage.setItem("leesdraak-qreset", "1"); } catch (e) {}
-  })();
   applyLook(performance.now());
   choosePlayer("sam");
   renderProfiles();
